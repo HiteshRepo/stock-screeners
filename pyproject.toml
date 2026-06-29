@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stock-screeners"
+version = "0.1.0"
+description = "Indian stock portfolio tools — dividend manager and more"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1",
+    "pyyaml>=6.0",
+    "yfinance>=0.2.40",
+    "pandas>=2.0",
+    "jinja2>=3.1",
+]
+
+# Optional AI provider SDKs — install only the one you use:
+#   pip install -e ".[ai-anthropic]"
+#   pip install -e ".[ai-openai]"
+#   pip install -e ".[ai-all]"     (both)
+# Ollama needs no extra package — it uses the requests library already installed.
+[project.optional-dependencies]
+ai-anthropic = ["anthropic>=0.30"]
+ai-openai    = ["openai>=1.0"]
+ai-all       = ["anthropic>=0.30", "openai>=1.0"]
+
+[project.scripts]
+# Add a new entry here when a new tool is built, e.g.:
+# tradr = "trade.cli:main"
+divvy = "dividend.cli:main"
+
+[tool.setuptools.packages.find]
+# Auto-discovers shared/, dividend/, trade/, etc.
+where = ["."]
+include = ["shared*", "dividend*", "trade*"]

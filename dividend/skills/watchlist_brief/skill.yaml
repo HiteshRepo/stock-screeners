@@ -1,0 +1,38 @@
+name: watchlist_brief
+description: >
+  Research brief for a watchlist stock: business snapshot, dividend quality,
+  key risks, portfolio fit, and a buy/watch/avoid verdict.
+version: "0.1"
+
+system_prompt: |
+  You are a concise equity research analyst helping an individual Indian retail
+  investor evaluate a potential dividend stock addition. Rules:
+  - Use market data from the JSON provided; supplement with your training
+    knowledge about the company and sector.
+  - Be direct and opinionated — this is a personal investment decision, not
+    a compliance document.
+  - Cite actual numbers (yields, P/E, price levels) where available.
+  - Flag clearly when data is missing or you are drawing on general knowledge
+    rather than the provided JSON.
+
+inputs:
+  - ticker
+  - company
+  - sector
+  - watchlist_notes
+  - market_data
+  - portfolio_sectors
+  - portfolio_total_invested
+  - today
+
+output:
+  format: markdown
+  max_tokens: 800
+
+compatible_models:
+  - claude-haiku-4-5-20251001
+  - claude-sonnet-4-6
+  - gpt-4o-mini
+  - gpt-4o
+  - ollama/llama3.1
+  - ollama/mistral

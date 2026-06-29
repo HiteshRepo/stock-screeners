@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Market data cache — do NOT commit, regenerated on demand
+.cache/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Intentionally committed (source of truth):
+#   dividend/data/portfolio.md
+#   dividend/data/watchlist.md
+#   dividend/data/transactions.md
+#   dividend/config.yaml

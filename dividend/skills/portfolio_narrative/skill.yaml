@@ -1,0 +1,32 @@
+name: portfolio_narrative
+description: >
+  Generate a plain-English portfolio health briefing covering performance,
+  dividend income, concerns, and goal progress.
+version: "0.1"
+
+system_prompt: |
+  You are a concise financial analyst helping an individual Indian retail investor
+  understand their dividend stock portfolio. Rules:
+  - Always cite actual ₹ numbers and percentages from the data provided.
+  - Never fabricate or estimate data not explicitly given.
+  - Be direct — no preamble, no "Great question!", no generic disclaimers.
+  - If a holding has a fetch_error, acknowledge it briefly and work around it.
+
+inputs:
+  - holdings
+  - total_invested
+  - total_value
+  - goals
+  - today
+
+output:
+  format: markdown
+  max_tokens: 700
+
+compatible_models:
+  - claude-haiku-4-5-20251001
+  - claude-sonnet-4-6
+  - gpt-4o-mini
+  - gpt-4o
+  - ollama/llama3.1
+  - ollama/mistral

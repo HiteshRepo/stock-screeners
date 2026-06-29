@@ -1,0 +1,38 @@
+# Divvy — dividend portfolio tool configuration
+# Run `divvy --help` from the repo root for usage.
+# Run `divvy ai --help` for AI skill usage.
+
+files:
+  portfolio:    dividend/data/portfolio.md
+  watchlist:    dividend/data/watchlist.md
+  transactions: dividend/data/transactions.md
+  cache:        .cache/market_data.json   # gitignored
+
+# How long fetched market data stays valid before being re-fetched (hours)
+cache_expiry_hours: 24
+
+# Thresholds used by the `review` command
+thresholds:
+  # Flag holding if trailing yield has dropped by more than this % RELATIVE
+  # to the yield at the time you bought. Example: bought at 5% yield,
+  # yield_drop_pct = 20 → flag if current yield < 4.0% (a 20% relative drop).
+  yield_drop_pct: 20.0
+
+  # Flag holding if current price is more than this % BELOW your avg buy price.
+  price_drop_pct: 15.0
+
+# Portfolio goals — `status` shows progress as current market value vs. target.
+# Add as many named goals as you like.
+goals:
+  fuel-fund: 1500000        # ₹15,00,000
+  # vacation-fund: 500000   # ₹5,00,000  (uncomment to activate)
+
+# AI skills — used by `divvy ai <skill>`
+# Install the provider SDK first:
+#   pip install -e ".[ai-anthropic]"   → Claude
+#   pip install -e ".[ai-openai]"      → GPT
+#   Ollama needs no extra package (run `ollama serve` locally)
+ai:
+  provider: anthropic                  # anthropic | openai | ollama
+  model: claude-haiku-4-5-20251001    # fast + cheap for portfolio tasks
+  # ollama_base_url: http://localhost:11434   # uncomment if using Ollama
