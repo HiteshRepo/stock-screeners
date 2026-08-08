@@ -3,6 +3,7 @@ PYTHON := $(VENV)/bin/python
 PIP    := $(VENV)/bin/pip
 PYTEST := $(VENV)/bin/pytest
 DIVVY  := $(VENV)/bin/divvy
+DIVVY_TEST := $(DIVVY) --config-file dividend/config.test.yaml
 
 # Overridable variables for buy/sell/recommend/ai
 TICKER ?=
@@ -20,7 +21,13 @@ TOP    ?= 3
         recommend recommend-refresh \
         buy sell \
         watchlist portfolio transactions \
-        ai-narrative ai-watchlist
+        ai-narrative ai-watchlist \
+        test-status test-status-refresh \
+        test-review test-review-refresh \
+        test-recommend test-recommend-refresh \
+        test-buy test-sell \
+        test-watchlist test-portfolio test-transactions \
+        test-cache-clear test-quote
 
 help:
 	@echo "Usage: make <target>"
@@ -58,6 +65,21 @@ help:
 	@echo "Divvy — AI skills"
 	@echo "  ai-narrative          Portfolio health briefing (LLM)"
 	@echo "  ai-watchlist          Research brief for a ticker  TICKER=POWERGRID"
+	@echo ""
+	@echo "Divvy — test data  (uses dividend/config.test.yaml)"
+	@echo "  test-status           status with test data"
+	@echo "  test-status-refresh   status with test data (force-refresh)"
+	@echo "  test-review           review with test data"
+	@echo "  test-review-refresh   review with test data (force-refresh)"
+	@echo "  test-recommend        recommend with test data  AMOUNT=10000 TOP=3"
+	@echo "  test-recommend-refresh  same, force-refresh"
+	@echo "  test-buy              Record a buy  TICKER=ITC SHARES=10 PRICE=400"
+	@echo "  test-sell             Record a sell TICKER=ITC SHARES=5  PRICE=450"
+	@echo "  test-watchlist        Open test watchlist.md in \$$EDITOR"
+	@echo "  test-portfolio        Open test portfolio.md in \$$EDITOR"
+	@echo "  test-transactions     Open test transactions.md in \$$EDITOR"
+	@echo "  test-cache-clear      Delete .cache/market_data_test.json"
+	@echo "  test-quote            Dump raw price+dividend data for a ticker  TICKER=HDFCBANK"
 	@echo ""
 	@echo "Ops"
 	@echo "  cache-clear           Delete .cache/market_data.json"
@@ -158,6 +180,55 @@ ai-narrative:
 ai-watchlist:
 	@test -n "$(TICKER)" || (echo "Error: TICKER is required.  make ai-watchlist TICKER=POWERGRID" && exit 1)
 	$(DIVVY) ai watchlist-brief --ticker $(TICKER)
+
+# ── Divvy — test data ────────────────────────────────────────────────────────
+
+test-status:
+	$(DIVVY_TEST) status
+
+test-status-refresh:
+	$(DIVVY_TEST) status --refresh
+
+test-review:
+	$(DIVVY_TEST) review
+
+test-review-refresh:
+	$(DIVVY_TEST) review --refresh
+
+test-recommend:
+	$(DIVVY_TEST) recommend --amount $(AMOUNT) --top $(TOP)
+
+test-recommend-refresh:
+	$(DIVVY_TEST) recommend --amount $(AMOUNT) --top $(TOP) --refresh
+
+test-buy:
+	@test -n "$(TICKER)" || (echo "Error: TICKER is required.  make test-buy TICKER=ITC SHARES=10 PRICE=400" && exit 1)
+	@test -n "$(SHARES)" || (echo "Error: SHARES is required.  make test-buy TICKER=$(TICKER) SHARES=10 PRICE=400" && exit 1)
+	@test -n "$(PRICE)"  || (echo "Error: PRICE is required.   make test-buy TICKER=$(TICKER) SHARES=$(SHARES) PRICE=400" && exit 1)
+	$(DIVVY_TEST) buy --ticker $(TICKER) --shares $(SHARES) --price $(PRICE)
+
+test-sell:
+	@test -n "$(TICKER)" || (echo "Error: TICKER is required.  make test-sell TICKER=ITC SHARES=5 PRICE=450" && exit 1)
+	@test -n "$(SHARES)" || (echo "Error: SHARES is required.  make test-sell TICKER=$(TICKER) SHARES=5 PRICE=450" && exit 1)
+	@test -n "$(PRICE)"  || (echo "Error: PRICE is required.   make test-sell TICKER=$(TICKER) SHARES=$(SHARES) PRICE=450" && exit 1)
+	$(DIVVY_TEST) sell --ticker $(TICKER) --shares $(SHARES) --price $(PRICE)
+
+test-watchlist:
+	$${EDITOR:-vi} dividend/data/test/watchlist.md
+
+test-portfolio:
+	$${EDITOR:-vi} dividend/data/test/portfolio.md
+
+test-transactions:
+	$${EDITOR:-vi} dividend/data/test/transactions.md
+
+test-cache-clear:
+	rm -f .cache/market_data_test.json
+	@echo "Test cache cleared."
+
+test-quote:
+	@test -n "$(TICKER)" || (echo "Error: TICKER is required.  make test-quote TICKER=HDFCBANK" && exit 1)
+	$(PYTHON) -m shared.market_data $(TICKER)
 
 # ── Ops ──────────────────────────────────────────────────────────────────────
 

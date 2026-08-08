@@ -1,0 +1,26 @@
+# Divvy — TEST configuration
+# Use this config to manually test the app without touching real data.
+#
+# Usage:
+#   divvy --config-file dividend/config.test.yaml status
+#   divvy --config-file dividend/config.test.yaml review
+#   divvy --config-file dividend/config.test.yaml recommend --amount 10000
+
+files:
+  portfolio:    dividend/data/test/portfolio.md
+  watchlist:    dividend/data/test/watchlist.md
+  transactions: dividend/data/test/transactions.md
+  cache:        .cache/market_data_test.json
+
+cache_expiry_hours: 24
+
+thresholds:
+  yield_drop_pct: 20.0
+  price_drop_pct: 15.0
+
+goals:
+  fuel-fund: 1500000
+
+ai:
+  provider: anthropic
+  model: claude-haiku-4-5-20251001
