@@ -20,42 +20,34 @@ to buy next from your watchlist.
 
 ---
 
+## New here?
+
+See **[docs/getting-started.md](docs/getting-started.md)** for a step-by-step
+walkthrough: install → build a watchlist → get a recommendation → record a buy →
+review periodically.
+
+The rest of this file is the full command and configuration reference.
+
+---
+
 ## Setup
 
 ```bash
-# 1. Create your private repo
-git init
-gh repo create --private
+# 1. Create your private repo (portfolio data should stay private)
+git init && gh repo create --private
 
-# 2. Install (run once; creates the `divvy` CLI command)
-python3 -m venv .venv
+# 2. Install (creates .venv and the `divvy` CLI in one step)
+make install
+
+# 3. Activate the venv so you can call `divvy` directly
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -e .
 
-# 3. Verify
+# 4. Verify
 divvy --help
 ```
 
 Always run `divvy` from the **repo root** so the relative paths in `dividend/config.yaml`
 resolve correctly.
-
----
-
-## Typical workflow
-
-```
-Initial setup
-  └─ Add candidate stocks to watchlist.md (manually)
-
-When you have spare cash
-  1. divvy recommend --amount 25000   → see top-3 picks from your watchlist
-  2. Buy via your broker app
-  3. divvy buy --ticker ITC --shares 50 --price 400   → records the buy
-
-Periodically
-  └─ divvy review        → flags holdings with price/yield deterioration
-  └─ divvy status        → full dashboard: value, income, goals
-```
 
 ---
 
@@ -337,8 +329,10 @@ See `TODO.md` for planned skills: `review-analyst`, `sell-thesis`, `portfolio-qu
 ## Running tests
 
 ```bash
-pip install -r requirements-dev.txt
-pytest tests/ -v
+make test       # quiet
+make test-v     # verbose
+make coverage   # with coverage report (fails under 80%)
+make check      # lint + test — use as a pre-commit gate
 ```
 
 ---
