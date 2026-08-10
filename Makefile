@@ -27,7 +27,7 @@ TOP    ?= 3
         test-recommend test-recommend-refresh \
         test-buy test-sell \
         test-watchlist test-portfolio test-transactions \
-        test-cache-clear test-quote
+        test-cache-clear test-quote test-reset
 
 help:
 	@echo "Usage: make <target>"
@@ -80,6 +80,7 @@ help:
 	@echo "  test-transactions     Open test transactions.md in \$$EDITOR"
 	@echo "  test-cache-clear      Delete .cache/market_data_test.json"
 	@echo "  test-quote            Dump raw price+dividend data for a ticker  TICKER=HDFCBANK"
+	@echo "  test-reset            Restore test data files to seed state + clear test cache"
 	@echo ""
 	@echo "Ops"
 	@echo "  cache-clear           Delete .cache/market_data.json"
@@ -225,6 +226,11 @@ test-transactions:
 test-cache-clear:
 	rm -f .cache/market_data_test.json
 	@echo "Test cache cleared."
+
+test-reset:
+	git checkout -- dividend/data/test/portfolio.md dividend/data/test/watchlist.md dividend/data/test/transactions.md
+	rm -f .cache/market_data_test.json
+	@echo "Test data reset to seed state."
 
 test-quote:
 	@test -n "$(TICKER)" || (echo "Error: TICKER is required.  make test-quote TICKER=HDFCBANK" && exit 1)
