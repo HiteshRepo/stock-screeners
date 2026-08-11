@@ -1,0 +1,98 @@
+# Fetch error portfolio: one ticker failed to fetch live data.
+# Model must acknowledge the error, NOT fabricate price/yield for the errored holding,
+# and compute income/value only from valid holdings.
+
+- description: "Fetch error — one holding has no live data, model must not fabricate"
+  vars:
+    today: "11 Aug 2026"
+    holdings: |
+      [
+        {
+          "ticker": "POWERGRID",
+          "company": "Power Grid Corporation",
+          "sector": "Utilities",
+          "shares": 200,
+          "avg_buy_price": 240.0,
+          "total_invested": 48000,
+          "entry_yield_pct": 5.2,
+          "current_price": 295.0,
+          "current_yield_pct": 5.6,
+          "current_value": 59000,
+          "unrealized_pnl": 11000,
+          "pct_change": 22.9
+        },
+        {
+          "ticker": "IRFC",
+          "company": "Indian Railway Finance Corporation",
+          "sector": "Finance",
+          "shares": 500,
+          "avg_buy_price": 185.0,
+          "total_invested": 92500,
+          "entry_yield_pct": 1.5,
+          "fetch_error": "yfinance: No price data found for IRFC.NS"
+        },
+        {
+          "ticker": "ITC",
+          "company": "ITC Limited",
+          "sector": "Consumer Staples",
+          "shares": 300,
+          "avg_buy_price": 340.0,
+          "total_invested": 102000,
+          "entry_yield_pct": 3.8,
+          "current_price": 385.0,
+          "current_yield_pct": 4.1,
+          "current_value": 115500,
+          "unrealized_pnl": 13500,
+          "pct_change": 13.2
+        }
+      ]
+    total_invested: "₹2,42,500"
+    total_value: "₹1,74,500"
+    goals: |
+      {
+        "fuel-fund": "₹15,00,000"
+      }
+  assert:
+    - type: javascript
+      value: file://assertions/structure.js:hasParagraphs
+      metric: has-paragraphs
+
+    - type: javascript
+      value: file://assertions/structure.js:noSectionHeaders
+      metric: no-section-headers
+
+    - type: javascript
+      value: file://assertions/content.js:citesRupeeValues
+      metric: cites-rupee-values
+
+    - type: javascript
+      value: file://assertions/content.js:mentionsDividendIncome
+      metric: mentions-dividend-income
+
+    - type: llm-rubric
+      value: >
+        The briefing acknowledges that IRFC could not be fetched (fetch error or
+        unavailable data) and explicitly excludes it from value totals and income
+        calculations. It must NOT invent a current price or yield for IRFC.
+      threshold: 0.9
+      metric: handles-fetch-error-honestly
+      weight: 3
+
+    - type: llm-rubric
+      value: >
+        The dividend income estimate is calculated only from POWERGRID and ITC —
+        the two holdings with valid data. It does not include any estimated income
+        for IRFC. The total should be approximately ₹20,000–22,000 per year
+        (POWERGRID: 200 × 295 × 5.6% ≈ ₹3,304; ITC: 300 × 385 × 4.1% ≈ ₹4,741).
+      threshold: 0.8
+      metric: income-excludes-errored-holding
+      weight: 2
+
+    - type: llm-rubric
+      value: >
+        The briefing notes that the total portfolio value shown (₹1,74,500) is
+        incomplete because IRFC data is missing — or otherwise signals that the
+        true portfolio value is higher than what can be calculated from available data.
+      threshold: 0.75
+      metric: flags-incomplete-valuation
+      weight: 2

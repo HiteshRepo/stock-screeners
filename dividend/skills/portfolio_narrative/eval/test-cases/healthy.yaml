@@ -1,0 +1,103 @@
+# Healthy portfolio: all holdings profitable, yields intact, goal comfortably on track.
+# Model should produce a positive briefing, estimate annual income, note no concerns,
+# and show goal progress as "on track" or better.
+
+- description: "Healthy — all green, yields intact, goal 62% complete"
+  vars:
+    today: "11 Aug 2026"
+    holdings: |
+      [
+        {
+          "ticker": "POWERGRID",
+          "company": "Power Grid Corporation",
+          "sector": "Utilities",
+          "shares": 200,
+          "avg_buy_price": 240.0,
+          "total_invested": 48000,
+          "entry_yield_pct": 5.2,
+          "current_price": 295.0,
+          "current_yield_pct": 5.6,
+          "current_value": 59000,
+          "unrealized_pnl": 11000,
+          "pct_change": 22.9
+        },
+        {
+          "ticker": "ITC",
+          "company": "ITC Limited",
+          "sector": "Consumer Staples",
+          "shares": 300,
+          "avg_buy_price": 340.0,
+          "total_invested": 102000,
+          "entry_yield_pct": 3.8,
+          "current_price": 385.0,
+          "current_yield_pct": 4.1,
+          "current_value": 115500,
+          "unrealized_pnl": 13500,
+          "pct_change": 13.2
+        },
+        {
+          "ticker": "HDFCBANK",
+          "company": "HDFC Bank",
+          "sector": "Finance",
+          "shares": 50,
+          "avg_buy_price": 1580.0,
+          "total_invested": 79000,
+          "entry_yield_pct": 1.2,
+          "current_price": 1720.0,
+          "current_yield_pct": 1.3,
+          "current_value": 86000,
+          "unrealized_pnl": 7000,
+          "pct_change": 8.9
+        }
+      ]
+    total_invested: "₹2,29,000"
+    total_value: "₹2,60,500"
+    goals: |
+      {
+        "fuel-fund": "₹15,00,000"
+      }
+  assert:
+    - type: javascript
+      value: file://assertions/structure.js:hasParagraphs
+      metric: has-paragraphs
+
+    - type: javascript
+      value: file://assertions/structure.js:noSectionHeaders
+      metric: no-section-headers
+
+    - type: javascript
+      value: file://assertions/content.js:citesRupeeValues
+      metric: cites-rupee-values
+
+    - type: javascript
+      value: file://assertions/content.js:mentionsDividendIncome
+      metric: mentions-dividend-income
+
+    - type: llm-rubric
+      value: >
+        The briefing covers all four required topics: (1) overall performance with
+        ₹ P&L figures, (2) estimated annual dividend income in ₹ per year naming
+        top contributors, (3) concerns section — which should note no concerns since
+        all holdings are profitable and yields are stable or improving, (4) goal
+        progress for "fuel-fund" with current value vs ₹15,00,000 target.
+      threshold: 0.8
+      metric: covers-all-four-topics
+      weight: 3
+
+    - type: llm-rubric
+      value: >
+        The briefing does NOT flag any holding as a concern. All three holdings
+        (POWERGRID, ITC, HDFCBANK) have positive unrealized P&L and their current
+        yields are equal to or higher than entry yields — no concern flags are warranted.
+      threshold: 0.8
+      metric: no-false-concerns
+      weight: 2
+
+    - type: llm-rubric
+      value: >
+        The annual dividend income estimate is calculated from the holdings data
+        and expressed as a ₹ per year figure. POWERGRID (200 shares × ₹295 × 5.6%)
+        and ITC (300 shares × ₹385 × 4.1%) should be identified as the top contributors.
+      threshold: 0.75
+      metric: dividend-income-accuracy
+      weight: 2

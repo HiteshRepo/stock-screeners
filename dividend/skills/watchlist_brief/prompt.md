@@ -24,7 +24,7 @@ Write a structured research brief with these five sections:
 2–3 sentences: what the company does, its competitive moat, and why it historically pays dividends (stable cash flows, PSU mandate, etc.).
 
 ### Dividend quality
-Comment on: current yield vs sector norms, payout ratio sustainability (flag if >80% for cyclicals or >95% generally), whether dividends have grown or been cut in recent years (draw on training knowledge), and FCF coverage. Give a one-word quality rating: **Excellent / Good / Fair / Weak**.
+Comment on: current yield vs sector norms, payout ratio sustainability (flag if >80% for cyclicals or >95% generally; a payout below 60% is healthy), whether dividends have grown or been cut in recent years (draw on training knowledge), and FCF coverage. End with exactly this line: Quality: **Excellent** or Quality: **Good** or Quality: **Fair** or Quality: **Weak**.
 
 ### Key risks
 3 specific bullet points — company or sector specific, not generic market risk.
@@ -34,3 +34,7 @@ One paragraph: does this improve sector diversification given the allocation dat
 
 ### Verdict
 **Buy / Watch / Avoid** — one sentence with the decisive reason.
+Your verdict must follow directly from the four sections above. Use this as a guide:
+- **Avoid**: payout > 85%, OR the sector would exceed 35% of the portfolio after adding this stock.
+- **Buy**: yield ≥ 4% AND payout ≤ 70% AND price is ≥ 15% below 52w_high AND sector stays under 30%.
+- **Watch**: everything else — fundamentals are acceptable but entry is not yet compelling.

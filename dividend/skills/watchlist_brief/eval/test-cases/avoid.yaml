@@ -1,0 +1,88 @@
+# Avoid case: high payout ratio (91%), price near 52w high (2.5% below),
+# Finance sector already overweight (42%) — adding would push to ~48%.
+# Any reasonable analyst should say Avoid or at most Watch.
+
+- description: "Avoid — unsustainable payout, stretched price, overweight sector"
+  vars:
+    ticker: HDFCAMC
+    company: HDFC Asset Management Company
+    sector: Finance
+    watchlist_notes: ""
+    market_data: |
+      {
+        "current_price": 4180,
+        "trailing_yield_pct": 2.1,
+        "52w_high": 4290,
+        "52w_low": 2650,
+        "pct_below_52w_high": 2.5,
+        "payout_ratio_pct": 91
+      }
+    portfolio_sectors: |
+      {
+        "Finance": 42.0,
+        "Utilities": 28.0,
+        "Energy": 15.0,
+        "Consumer Staples": 15.0
+      }
+    portfolio_total_invested: "₹8,00,000"
+    today: "11 Aug 2026"
+  assert:
+    # ── Structural checks ────────────────────────────────────────────────
+    - type: javascript
+      value: file://assertions/structure.js:hasAllSections
+      metric: has-all-sections
+
+    - type: javascript
+      value: file://assertions/structure.js:hasValidVerdict
+      metric: has-valid-verdict
+
+    - type: javascript
+      value: file://assertions/structure.js:hasValidQualityRating
+      metric: has-valid-quality-rating
+
+    - type: javascript
+      value: file://assertions/structure.js:hasKeyRiskBullets
+      metric: has-key-risk-bullets
+
+    # ── Content checks ───────────────────────────────────────────────────
+    - type: javascript
+      value: file://assertions/content.js:citesNumbers
+      metric: cites-numbers
+
+    # ── LLM rubric ───────────────────────────────────────────────────────
+    - type: llm-rubric
+      value: >
+        The verdict must NOT be Buy. A verdict of Avoid or Watch both pass this check.
+        The only failing verdict is Buy.
+        Context: payout is 91% (unsustainable), Finance would rise from 42% to ~48%
+        (well above 30% cap), and price is only 2.5% below 52-week high.
+        Return pass=true if verdict is Avoid or Watch. Return pass=false only if verdict is Buy.
+      threshold: 0.8
+      metric: correct-verdict-direction
+      weight: 3
+
+    - type: llm-rubric
+      value: >
+        The brief explicitly flags the 91% payout ratio as a concern — either calling
+        it unsustainable, high, or noting it exceeds the 80% threshold for most sectors.
+      threshold: 0.8
+      metric: flags-high-payout
+      weight: 2
+
+    - type: llm-rubric
+      value: >
+        The portfolio fit section notes that Finance is already overweight and that
+        adding this stock would push sector concentration above a healthy limit (30%).
+      threshold: 0.75
+      metric: flags-sector-concentration
+      weight: 2
+
+    - type: llm-rubric
+      value: >
+        The key risks are specific to HDFC AMC or the Indian asset management industry
+        — not generic statements like "market risk" or "economic slowdown".
+        Examples of specific risks: AUM concentration in equity funds, MF industry
+        fee compression, regulatory changes by SEBI, competition from index funds.
+      threshold: 0.7
+      metric: specific-risks
+      weight: 1.5

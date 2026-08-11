@@ -1,0 +1,88 @@
+# Buy case: healthy payout (44%), price 32% below 52w high (attractive entry),
+# Utilities underrepresented (8%), strong yield (5.8%) for a PSU.
+# Any reasonable analyst should say Buy or at most Watch.
+
+- description: "Buy — healthy payout, attractive price, underweight sector, strong yield"
+  vars:
+    ticker: POWERGRID
+    company: Power Grid Corporation of India
+    sector: Utilities
+    watchlist_notes: "PSU with regulated returns, consistent dividend history"
+    market_data: |
+      {
+        "current_price": 285,
+        "trailing_yield_pct": 5.8,
+        "52w_high": 420,
+        "52w_low": 265,
+        "pct_below_52w_high": 32.1,
+        "payout_ratio_pct": 44
+      }
+    portfolio_sectors: |
+      {
+        "Finance": 42.0,
+        "Consumer Staples": 28.0,
+        "Energy": 22.0,
+        "Utilities": 8.0
+      }
+    portfolio_total_invested: "₹8,00,000"
+    today: "11 Aug 2026"
+  assert:
+    # ── Structural checks ────────────────────────────────────────────────
+    - type: javascript
+      value: file://assertions/structure.js:hasAllSections
+      metric: has-all-sections
+
+    - type: javascript
+      value: file://assertions/structure.js:hasValidVerdict
+      metric: has-valid-verdict
+
+    - type: javascript
+      value: file://assertions/structure.js:hasValidQualityRating
+      metric: has-valid-quality-rating
+
+    - type: javascript
+      value: file://assertions/structure.js:hasKeyRiskBullets
+      metric: has-key-risk-bullets
+
+    # ── Content checks ───────────────────────────────────────────────────
+    - type: javascript
+      value: file://assertions/content.js:citesNumbers
+      metric: cites-numbers
+
+    # ── LLM rubric ───────────────────────────────────────────────────────
+    - type: llm-rubric
+      value: >
+        The verdict is **Buy** or **Watch**, not **Avoid**.
+        Rationale: 5.8% yield with a 44% payout ratio is highly sustainable, the price
+        is 32% below the 52-week high (attractive entry), and Utilities is underrepresented
+        at only 8% of the portfolio. An Avoid verdict here is incorrect.
+      threshold: 0.8
+      metric: correct-verdict-direction
+      weight: 3
+
+    - type: llm-rubric
+      value: >
+        The portfolio fit section notes that at 8%, Utilities is underrepresented and
+        that adding POWERGRID would improve diversification — and that it would NOT
+        push any sector above 30%.
+      threshold: 0.75
+      metric: recognises-diversification-benefit
+      weight: 2
+
+    - type: llm-rubric
+      value: >
+        The brief notes the price is significantly below the 52-week high (around 32%)
+        and characterises this as an attractive or reasonable entry point.
+      threshold: 0.75
+      metric: recognises-attractive-entry
+      weight: 2
+
+    - type: llm-rubric
+      value: >
+        The key risks are specific to POWERGRID or the Indian power transmission sector —
+        not generic. Examples of specific risks: regulatory tariff resets by CERC,
+        capex execution risk on new transmission projects, DISCOM receivable delays,
+        grid integration risk from renewable energy transition.
+      threshold: 0.7
+      metric: specific-risks
+      weight: 1.5

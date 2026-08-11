@@ -66,6 +66,8 @@ help:
 	@echo "  ai-narrative          Portfolio health briefing (LLM)"
 	@echo "  ai-watchlist          Research brief for a ticker  TICKER=POWERGRID"
 	@echo "  test-ai-watchlist     Research brief for a ticker (test data)  TICKER=POWERGRID"
+	@echo "  eval-watchlist-brief  Run promptfoo eval across all models (needs npx)"
+	@echo "  eval-portfolio        Run promptfoo eval for portfolio-narrative across all models"
 	@echo ""
 	@echo "Divvy — test data  (uses dividend/config.test.yaml)"
 	@echo "  test-status           status with test data"
@@ -186,6 +188,12 @@ ai-watchlist:
 test-ai-watchlist:
 	@test -n "$(TICKER)" || (echo "Error: TICKER is required.  make test-ai-watchlist TICKER=POWERGRID" && exit 1)
 	$(DIVVY_TEST) ai watchlist-brief --ticker $(TICKER)
+
+eval-watchlist-brief:
+	cd dividend/skills/watchlist_brief/eval && npx promptfoo@latest eval --config promptfooconfig.yaml --no-cache
+
+eval-portfolio:
+	cd dividend/skills/portfolio_narrative/eval && npx promptfoo@latest eval --config promptfooconfig.yaml --no-cache
 
 # ── Divvy — test data ────────────────────────────────────────────────────────
 

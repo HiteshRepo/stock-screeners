@@ -1,0 +1,92 @@
+# Watch case: moderate payout (67%), price 14% below 52w high (fair but not cheap),
+# Consumer Staples at 18% (room but not urgent), decent yield (4.1%).
+# Genuinely ambiguous — Buy and Watch are both defensible; Avoid is not.
+# Tests whether models commit to a verdict vs hedge vaguely.
+
+- description: "Watch — moderate fundamentals, fair valuation, no urgency to act now"
+  vars:
+    ticker: ITC
+    company: ITC Limited
+    sector: Consumer Staples
+    watchlist_notes: "Diversified conglomerate, cigarette cash flows fund dividend"
+    market_data: |
+      {
+        "current_price": 380,
+        "trailing_yield_pct": 4.1,
+        "52w_high": 445,
+        "52w_low": 310,
+        "pct_below_52w_high": 14.6,
+        "payout_ratio_pct": 67
+      }
+    portfolio_sectors: |
+      {
+        "Finance": 38.0,
+        "Utilities": 24.0,
+        "Energy": 20.0,
+        "Consumer Staples": 18.0
+      }
+    portfolio_total_invested: "₹8,00,000"
+    today: "11 Aug 2026"
+  assert:
+    # ── Structural checks ────────────────────────────────────────────────
+    - type: javascript
+      value: file://assertions/structure.js:hasAllSections
+      metric: has-all-sections
+
+    - type: javascript
+      value: file://assertions/structure.js:hasValidVerdict
+      metric: has-valid-verdict
+
+    - type: javascript
+      value: file://assertions/structure.js:hasValidQualityRating
+      metric: has-valid-quality-rating
+
+    - type: javascript
+      value: file://assertions/structure.js:hasKeyRiskBullets
+      metric: has-key-risk-bullets
+
+    # ── Content checks ───────────────────────────────────────────────────
+    - type: javascript
+      value: file://assertions/content.js:citesNumbers
+      metric: cites-numbers
+
+    # ── LLM rubric ───────────────────────────────────────────────────────
+    - type: llm-rubric
+      value: >
+        The ### Verdict section contains exactly one of the words Buy, Watch, or Avoid
+        as the verdict, followed by a single decisive sentence. The model must NOT hedge
+        by using phrases like "it depends", "could go either way", "Buy or Watch", or
+        expressing both verdicts in the same line. One verdict word, one sentence.
+      threshold: 0.85
+      metric: commits-to-verdict
+      weight: 3
+
+    - type: llm-rubric
+      value: >
+        The verdict is **Watch** or **Buy**, not **Avoid**.
+        Rationale: 4.1% yield with 67% payout is sustainable, price is 14.6% below
+        the 52-week high (fair but not stretched), and Consumer Staples at 18% has
+        room to grow. An Avoid verdict is not justified by the data.
+      threshold: 0.75
+      metric: correct-verdict-direction
+      weight: 2
+
+    - type: llm-rubric
+      value: >
+        The brief mentions ITC's cigarette segment as the primary dividend-funding
+        business and flags this as a risk (regulatory, ESG, or long-term volume decline)
+        — not just generically calling it a "tobacco risk".
+      threshold: 0.7
+      metric: specific-cigarette-risk
+      weight: 1.5
+
+    - type: llm-rubric
+      value: >
+        The key risks are specific to ITC — examples include: cigarette volume decline
+        due to regulation or illicit trade, hotel/agri segment drag on returns,
+        FMCG business still not profitable at scale, ESG exclusion by institutional
+        investors. Generic risks like "competition" or "inflation" without specifics
+        do not count.
+      threshold: 0.7
+      metric: specific-risks
+      weight: 1.5

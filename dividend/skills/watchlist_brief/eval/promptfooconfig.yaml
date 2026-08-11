@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: Watchlist Brief — Multi-model consistency evaluation (v1)
+
+prompts:
+  - file://prompts/v1.yaml
+
+providers:
+  - id: ollama:mistral
+    label: Mistral (local)
+
+  # Uncomment when API keys are available:
+  # - id: anthropic:claude-haiku-4-5-20251001
+  #   label: Claude Haiku
+  # - id: openai:gpt-4o-mini
+  #   label: GPT-4o mini
+
+# llm-rubric assertions use this provider as the judge
+defaultTest:
+  options:
+    provider: ollama:mistral
+
+tests:
+  - file://test-cases/avoid.yaml
+  - file://test-cases/buy.yaml
+  - file://test-cases/watch.yaml
+
+outputPath: outputs/v1/results.html

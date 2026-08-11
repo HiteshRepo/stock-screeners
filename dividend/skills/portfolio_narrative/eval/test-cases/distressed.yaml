@@ -1,0 +1,101 @@
+# Distressed portfolio: one holding with >15% unrealized loss, one with yield drop >20%.
+# Model MUST flag both concerns by ticker name. Goal is well behind target.
+
+- description: "Distressed — one holding down 22%, one with yield drop 28%, goal at 18%"
+  vars:
+    today: "11 Aug 2026"
+    holdings: |
+      [
+        {
+          "ticker": "ADANIPORTS",
+          "company": "Adani Ports and SEZ",
+          "sector": "Infrastructure",
+          "shares": 100,
+          "avg_buy_price": 1250.0,
+          "total_invested": 125000,
+          "entry_yield_pct": 0.8,
+          "current_price": 975.0,
+          "current_yield_pct": 0.9,
+          "current_value": 97500,
+          "unrealized_pnl": -27500,
+          "pct_change": -22.0
+        },
+        {
+          "ticker": "COALINDIA",
+          "company": "Coal India",
+          "sector": "Energy",
+          "shares": 200,
+          "avg_buy_price": 420.0,
+          "total_invested": 84000,
+          "entry_yield_pct": 8.5,
+          "current_price": 440.0,
+          "current_yield_pct": 6.1,
+          "current_value": 88000,
+          "unrealized_pnl": 4000,
+          "pct_change": 4.8
+        },
+        {
+          "ticker": "POWERGRID",
+          "company": "Power Grid Corporation",
+          "sector": "Utilities",
+          "shares": 150,
+          "avg_buy_price": 260.0,
+          "total_invested": 39000,
+          "entry_yield_pct": 5.0,
+          "current_price": 295.0,
+          "current_yield_pct": 5.6,
+          "current_value": 44250,
+          "unrealized_pnl": 5250,
+          "pct_change": 13.5
+        }
+      ]
+    total_invested: "₹2,48,000"
+    total_value: "₹2,29,750"
+    goals: |
+      {
+        "fuel-fund": "₹15,00,000"
+      }
+  assert:
+    - type: javascript
+      value: file://assertions/structure.js:hasParagraphs
+      metric: has-paragraphs
+
+    - type: javascript
+      value: file://assertions/structure.js:noSectionHeaders
+      metric: no-section-headers
+
+    - type: javascript
+      value: file://assertions/content.js:citesRupeeValues
+      metric: cites-rupee-values
+
+    - type: javascript
+      value: file://assertions/content.js:mentionsDividendIncome
+      metric: mentions-dividend-income
+
+    - type: llm-rubric
+      value: >
+        The concerns section explicitly flags ADANIPORTS by ticker name: its unrealized
+        loss of ₹27,500 is 22% of the ₹1,25,000 invested — well beyond the 15% threshold.
+        The briefing must call this out with the ticker name and approximate ₹ loss.
+      threshold: 0.85
+      metric: flags-adaniports-loss
+      weight: 3
+
+    - type: llm-rubric
+      value: >
+        The concerns section explicitly flags COALINDIA by ticker name: entry yield was
+        8.5% and current yield is 6.1%, a relative drop of approximately 28% — beyond
+        the 20% relative drop threshold. The briefing must name COALINDIA and note
+        the yield deterioration.
+      threshold: 0.85
+      metric: flags-coalindia-yield-drop
+      weight: 3
+
+    - type: llm-rubric
+      value: >
+        The goal progress section notes the portfolio is significantly behind the
+        ₹15,00,000 fuel-fund target — current value of ₹2,29,750 is only about 15-16%
+        of the target — and characterises progress as slow or early-stage.
+      threshold: 0.8
+      metric: accurate-goal-progress
+      weight: 2
