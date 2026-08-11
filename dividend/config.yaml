@@ -33,6 +33,6 @@ goals:
 #   pip install -e ".[ai-openai]"      → GPT
 #   Ollama needs no extra package (run `ollama serve` locally)
 ai:
-  provider: anthropic                  # anthropic | openai | ollama
-  model: claude-haiku-4-5-20251001    # fast + cheap for portfolio tasks
-  # ollama_base_url: http://localhost:11434   # uncomment if using Ollama
+  provider: ollama                     # anthropic | openai | ollama
+  model: mistral                       # local model via Ollama
+  ollama_base_url: http://localhost:11434

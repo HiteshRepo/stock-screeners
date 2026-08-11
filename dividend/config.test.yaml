@@ -22,5 +22,6 @@ goals:
   fuel-fund: 1500000
 
 ai:
-  provider: anthropic
-  model: claude-haiku-4-5-20251001
+  provider: ollama
+  model: mistral
+  ollama_base_url: http://localhost:11434

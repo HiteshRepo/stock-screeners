@@ -73,15 +73,15 @@ def create_runner(provider: str, model: str, **kwargs) -> LLMRunner:
 
     if p == "anthropic":
         from .providers.anthropic import AnthropicRunner
-        return AnthropicRunner(model, **kwargs)
+        return AnthropicRunner(model, api_key=kwargs.get("api_key"))
 
     if p == "openai":
         from .providers.openai import OpenAIRunner
-        return OpenAIRunner(model, **kwargs)
+        return OpenAIRunner(model, api_key=kwargs.get("api_key"))
 
     if p == "ollama":
         from .providers.ollama import OllamaRunner
-        return OllamaRunner(model, **kwargs)
+        return OllamaRunner(model, ollama_base_url=kwargs.get("ollama_base_url") or "http://localhost:11434")
 
     raise ValueError(
         f"Unknown provider {provider!r}. "

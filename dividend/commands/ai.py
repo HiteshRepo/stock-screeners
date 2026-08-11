@@ -142,3 +142,29 @@ def ai_cmd(
             f"[{_provider}/{_model}]",
             err=True,
         )
+
+    # After watchlist-brief: offer to add ticker to watchlist if not already there
+    if skill_key == "watchlist_brief" and not context.get("_item_exists", True):
+        from datetime import date as _date
+        from dividend.md_io import WatchlistItem, read_watchlist, write_watchlist
+
+        click.echo()
+        if click.confirm(f"Add {context['ticker']} to watchlist?", default=False):
+            company = click.prompt("Company name", default=context["company"])
+            sector_default = context["sector"] if context["sector"] != "Unknown" else ""
+            sector = click.prompt("Sector", default=sector_default)
+            notes = click.prompt("Notes (optional)", default="")
+
+            raw = context.get("_market_data_raw", {})
+            new_item = WatchlistItem(
+                ticker=context["ticker"],
+                company=company,
+                sector=sector,
+                yield_pct=float(raw.get("trailing_yield_pct") or 0.0),
+                payout_ratio_pct=float(raw.get("payout_ratio_pct") or 0.0),
+                notes=notes,
+                date_added=_date.today().strftime("%Y-%m-%d"),
+            )
+            existing = read_watchlist(cfg.watchlist_path)
+            write_watchlist(cfg.watchlist_path, existing + [new_item])
+            click.echo(f"Added {context['ticker']} to watchlist.")

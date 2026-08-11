@@ -65,6 +65,7 @@ help:
 	@echo "Divvy — AI skills"
 	@echo "  ai-narrative          Portfolio health briefing (LLM)"
 	@echo "  ai-watchlist          Research brief for a ticker  TICKER=POWERGRID"
+	@echo "  test-ai-watchlist     Research brief for a ticker (test data)  TICKER=POWERGRID"
 	@echo ""
 	@echo "Divvy — test data  (uses dividend/config.test.yaml)"
 	@echo "  test-status           status with test data"
@@ -181,6 +182,10 @@ ai-narrative:
 ai-watchlist:
 	@test -n "$(TICKER)" || (echo "Error: TICKER is required.  make ai-watchlist TICKER=POWERGRID" && exit 1)
 	$(DIVVY) ai watchlist-brief --ticker $(TICKER)
+
+test-ai-watchlist:
+	@test -n "$(TICKER)" || (echo "Error: TICKER is required.  make test-ai-watchlist TICKER=POWERGRID" && exit 1)
+	$(DIVVY_TEST) ai watchlist-brief --ticker $(TICKER)
 
 # ── Divvy — test data ────────────────────────────────────────────────────────
 

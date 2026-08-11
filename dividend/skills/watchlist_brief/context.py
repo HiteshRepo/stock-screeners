@@ -79,4 +79,7 @@ def gather(cfg: Config, ticker: str = "", **kwargs) -> dict:
         "portfolio_sectors": json.dumps(sector_allocation, indent=2, ensure_ascii=False),
         "portfolio_total_invested": f"₹{portfolio_total:,.0f}",
         "today": date.today().strftime("%d %b %Y"),
+        # Non-template keys for programmatic use by ai_cmd (Jinja2 ignores unused keys)
+        "_item_exists": item is not None,
+        "_market_data_raw": market_data,
     }
