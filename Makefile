@@ -80,7 +80,7 @@ help:
 	@echo "  test-transactions     Open test transactions.md in \$$EDITOR"
 	@echo "  test-cache-clear      Delete .cache/market_data_test.json"
 	@echo "  test-quote            Dump raw price+dividend data for a ticker  TICKER=HDFCBANK"
-	@echo "  test-reset            Restore test data files to seed state + clear test cache"
+	@echo "  test-reset            Reset test data files to empty (headers only) + clear test cache"
 	@echo ""
 	@echo "Ops"
 	@echo "  cache-clear           Delete .cache/market_data.json"
@@ -228,9 +228,11 @@ test-cache-clear:
 	@echo "Test cache cleared."
 
 test-reset:
-	git checkout -- dividend/data/test/portfolio.md dividend/data/test/watchlist.md dividend/data/test/transactions.md
+	cp dividend/data/test/seeds/portfolio.md     dividend/data/test/portfolio.md
+	cp dividend/data/test/seeds/watchlist.md     dividend/data/test/watchlist.md
+	cp dividend/data/test/seeds/transactions.md  dividend/data/test/transactions.md
 	rm -f .cache/market_data_test.json
-	@echo "Test data reset to seed state."
+	@echo "Test data reset to empty state."
 
 test-quote:
 	@test -n "$(TICKER)" || (echo "Error: TICKER is required.  make test-quote TICKER=HDFCBANK" && exit 1)
