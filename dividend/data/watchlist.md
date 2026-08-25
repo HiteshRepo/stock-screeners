@@ -2,3 +2,5 @@
 
 | Ticker | Company | Sector | Yield % | Payout Ratio % | Notes | Date Added |
 |--------|---------|--------|---------|----------------|-------|------------|
+| INFY | Infosys | IT | 3.50 | 45.00 | Consistent payer | 2025-08-25 |
+| TCS | Tata Consultancy Services | IT | 2.80 | 40.00 | Blue chip | 2025-08-25 |
