@@ -637,3 +637,140 @@ class TestRecommendCommand:
         assert "#1" in result.output
         assert "#2" in result.output
         assert "#3" not in result.output
+
+
+# ---------------------------------------------------------------------------
+# watch command
+# ---------------------------------------------------------------------------
+
+def _mock_screener_quote(
+    ticker="INFY",
+    company_name="Infosys Limited",
+    price=1500.0,
+    yield_pct=3.5,
+    fifty_two_week_high=1800.0,
+    fifty_two_week_low=1200.0,
+    payout_ratio_pct=45.0,
+    sector="Information Technology",
+):
+    from shared.screener import ScreenerQuote
+    return ScreenerQuote(
+        ticker=ticker,
+        company_name=company_name,
+        price=price,
+        yield_pct=yield_pct,
+        fifty_two_week_high=fifty_two_week_high,
+        fifty_two_week_low=fifty_two_week_low,
+        payout_ratio_pct=payout_ratio_pct,
+        sector=sector,
+    )
+
+
+class TestWatchCommand:
+    def test_watch_adds_to_watchlist(self, env):
+        with patch("dividend.commands.watch.fetch_quotes") as mock_yf, \
+             patch("dividend.commands.watch.screener_fetch_quote", return_value=_mock_screener_quote()):
+            mock_yf.return_value = {"INFY.NS": _mock_quote("INFY.NS", price=1500.0, yield_pct=3.5)}
+            result = _invoke(env, ["watch", "--ticker", "INFY"])
+        assert result.exit_code == 0
+        items = read_watchlist(env["watchlist_path"])
+        assert any(w.ticker == "INFY" for w in items)
+
+    def test_watch_prefers_yfinance_for_yield_and_payout(self, env):
+        from shared.market_data import QuoteResult
+        from datetime import datetime
+        q = QuoteResult(
+            ticker="INFY.NS", price=1500.0, yield_pct=3.5,
+            fifty_two_week_high=1800.0, fifty_two_week_low=1200.0,
+            company_name="Infosys Limited", payout_ratio_pct=45.0,
+            error=None, fetched_at=datetime.now().isoformat(),
+        )
+        sc = _mock_screener_quote(yield_pct=9.9, payout_ratio_pct=99.0, sector="Information Technology")
+        with patch("dividend.commands.watch.fetch_quotes") as mock_yf, \
+             patch("dividend.commands.watch.screener_fetch_quote", return_value=sc):
+            mock_yf.return_value = {"INFY.NS": q}
+            _invoke(env, ["watch", "--ticker", "INFY"])
+        item = next(w for w in read_watchlist(env["watchlist_path"]) if w.ticker == "INFY")
+        # yfinance values should win
+        assert item.yield_pct == pytest.approx(3.5)
+        assert item.payout_ratio_pct == pytest.approx(45.0)
+        assert item.company == "Infosys Limited"
+        assert item.sector == "Information Technology"
+
+    def test_watch_fills_missing_fields_from_screener(self, env):
+        from shared.market_data import QuoteResult
+        from datetime import datetime
+        # yfinance returns no yield or payout
+        q = QuoteResult(
+            ticker="INFY.NS", price=1500.0, yield_pct=None,
+            fifty_two_week_high=1800.0, fifty_two_week_low=1200.0,
+            company_name=None, payout_ratio_pct=None,
+            error=None, fetched_at=datetime.now().isoformat(),
+        )
+        sc = _mock_screener_quote(company_name="Infosys Ltd", yield_pct=3.5, payout_ratio_pct=45.0, sector="IT")
+        with patch("dividend.commands.watch.fetch_quotes") as mock_yf, \
+             patch("dividend.commands.watch.screener_fetch_quote", return_value=sc):
+            mock_yf.return_value = {"INFY.NS": q}
+            _invoke(env, ["watch", "--ticker", "INFY"])
+        item = next(w for w in read_watchlist(env["watchlist_path"]) if w.ticker == "INFY")
+        assert item.company == "Infosys Ltd"
+        assert item.yield_pct == pytest.approx(3.5)
+        assert item.payout_ratio_pct == pytest.approx(45.0)
+        assert item.sector == "IT"
+
+    def test_watch_uses_screener_as_full_fallback_when_yfinance_fails(self, env):
+        sc = _mock_screener_quote(company_name="Infosys Ltd", sector="IT", yield_pct=3.5, payout_ratio_pct=45.0)
+        with patch("dividend.commands.watch.fetch_quotes") as mock_yf, \
+             patch("dividend.commands.watch.screener_fetch_quote", return_value=sc):
+            mock_yf.return_value = {"INFY.NS": _error_quote("INFY.NS")}
+            result = _invoke(env, ["watch", "--ticker", "INFY"])
+        assert result.exit_code == 0
+        item = next(w for w in read_watchlist(env["watchlist_path"]) if w.ticker == "INFY")
+        assert item.company == "Infosys Ltd"
+        assert item.sector == "IT"
+
+    def test_watch_sector_falls_back_to_unknown_when_screener_returns_none(self, env):
+        with patch("dividend.commands.watch.fetch_quotes") as mock_yf, \
+             patch("dividend.commands.watch.screener_fetch_quote", return_value=None):
+            mock_yf.return_value = {"INFY.NS": _mock_quote("INFY.NS")}
+            _invoke(env, ["watch", "--ticker", "INFY"])
+        item = next(w for w in read_watchlist(env["watchlist_path"]) if w.ticker == "INFY")
+        assert item.sector == "Unknown"
+
+    def test_watch_fails_when_both_sources_fail(self, env):
+        with patch("dividend.commands.watch.fetch_quotes") as mock_yf, \
+             patch("dividend.commands.watch.screener_fetch_quote", return_value=None):
+            mock_yf.return_value = {"BADTICK.NS": _error_quote("BADTICK.NS")}
+            result = _invoke(env, ["watch", "--ticker", "BADTICK"])
+        assert result.exit_code != 0
+        assert "Could not fetch" in result.output
+
+    def test_watch_saves_notes(self, env):
+        with patch("dividend.commands.watch.fetch_quotes") as mock_yf, \
+             patch("dividend.commands.watch.screener_fetch_quote", return_value=_mock_screener_quote()):
+            mock_yf.return_value = {"INFY.NS": _mock_quote("INFY.NS")}
+            _invoke(env, ["watch", "--ticker", "INFY", "--notes", "Good payer"])
+        item = next(w for w in read_watchlist(env["watchlist_path"]) if w.ticker == "INFY")
+        assert item.notes == "Good payer"
+
+    def test_watch_rejects_duplicate(self, env):
+        _add_watchlist_item(env, ticker="ITC")
+        # duplicate check fires before any network call
+        result = _invoke(env, ["watch", "--ticker", "ITC"], input="y\n")
+        assert result.exit_code != 0
+        assert "already in your watchlist" in result.output
+
+    def test_watch_cancelled_makes_no_changes(self, env):
+        with patch("dividend.commands.watch.fetch_quotes") as mock_yf, \
+             patch("dividend.commands.watch.screener_fetch_quote", return_value=_mock_screener_quote()):
+            mock_yf.return_value = {"INFY.NS": _mock_quote("INFY.NS")}
+            result = _invoke(env, ["watch", "--ticker", "INFY"], input="n\n")
+        assert "Cancelled" in result.output
+        assert not any(w.ticker == "INFY" for w in read_watchlist(env["watchlist_path"]))
+
+    def test_watch_ticker_normalised_to_uppercase(self, env):
+        with patch("dividend.commands.watch.fetch_quotes") as mock_yf, \
+             patch("dividend.commands.watch.screener_fetch_quote", return_value=_mock_screener_quote()):
+            mock_yf.return_value = {"INFY.NS": _mock_quote("INFY.NS")}
+            _invoke(env, ["watch", "--ticker", "infy"])
+        assert any(w.ticker == "INFY" for w in read_watchlist(env["watchlist_path"]))

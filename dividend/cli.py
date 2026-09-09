@@ -24,6 +24,7 @@ from .commands.status import status_cmd
 from .commands.review import review_cmd
 from .commands.recommend import recommend_cmd
 from .commands.ai import ai_cmd
+from .commands.watch import watch_cmd
 
 
 @click.group()
@@ -59,6 +60,7 @@ cli.add_command(status_cmd)
 cli.add_command(review_cmd)
 cli.add_command(recommend_cmd)
 cli.add_command(ai_cmd)
+cli.add_command(watch_cmd)
 
 
 def main() -> None:
